@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}المستندات - نظام إدارة المستندات{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2><i class="fas fa-folder-open"></i> المستندات</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        {% if can_upload %}
+        <a href="{% url 'documents:upload' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> رفع مستند جديد
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Search -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-10">
+                <input type="text" name="search" class="form-control" 
+                       placeholder="ابحث عن مستند..." 
+                       value="{{ search_query }}">
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="fas fa-search"></i> بحث
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Documents Table -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="fas fa-list"></i> قائمة المستندات 
+            <span class="badge bg-light text-dark">{{ documents.count }}</span>
+        </h5>
+    </div>
+    <div class="card-body">
+        {% if documents %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th><i class="fas fa-file-pdf"></i> العنوان</th>
+                        <th><i class="fas fa-align-left"></i> الوصف</th>
+                        <th><i class="fas fa-user"></i> رفع بواسطة</th>
+                        <th><i class="fas fa-calendar"></i> التاريخ</th>
+                        <th><i class="fas fa-weight"></i> الحجم</th>
+                        <th><i class="fas fa-eye"></i> المشاهدات</th>
+                        <th class="text-center"><i class="fas fa-cog"></i> الإجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for doc in documents %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'documents:view' doc.pk %}" class="text-decoration-none">
+                                <i class="fas fa-file-pdf text-danger"></i>
+                                <strong>{{ doc.title }}</strong>
+                            </a>
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                {{ doc.description|truncatewords:10|default:"لا يوجد وصف" }}
+                            </small>
+                        </td>
+                        <td>
+                            <small>{{ doc.uploaded_by.get_full_name|default:doc.uploaded_by.username }}</small>
+                        </td>
+                        <td>
+                            <small>{{ doc.uploaded_at|date:"Y/m/d" }}</small>
+                        </td>
+                        <td>
+                            <small>{{ doc.get_file_size_display }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-info">{{ doc.views_count }}</span>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group" role="group">
+                                <a href="{% url 'documents:view' doc.pk %}" 
+                                   class="btn btn-sm btn-primary" 
+                                   title="عرض">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                
+                                <a href="{% url 'documents:download' doc.pk %}" 
+                                   class="btn btn-sm btn-success" 
+                                   title="تحميل">
+                                    <i class="fas fa-download"></i>
+                                </a>
+                                
+                                {% if can_print %}
+                                <a href="{% url 'documents:print' doc.pk %}" 
+                                   class="btn btn-sm btn-info" 
+                                   target="_blank"
+                                   title="طباعة">
+                                    <i class="fas fa-print"></i>
+                                </a>
+                                {% endif %}
+                                
+                                {% if can_delete %}
+                                <a href="{% url 'documents:delete' doc.pk %}" 
+                                   class="btn btn-sm btn-danger" 
+                                   title="حذف">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">لا توجد مستندات</h4>
+            {% if can_upload %}
+            <p>ابدأ برفع أول مستند</p>
+            <a href="{% url 'documents:upload' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> رفع مستند
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-file fa-3x text-primary mb-3"></i>
+                <h3>{{ documents.count }}</h3>
+                <p class="text-muted mb-0">إجمالي المستندات</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-eye fa-3x text-success mb-3"></i>
+                <h3>{{ documents|length }}</h3>
+                <p class="text-muted mb-0">المستندات المعروضة</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center">
+            <div class="card-body">
+                <i class="fas fa-user fa-3x text-info mb-3"></i>
+                <h3>{{ user.get_full_name|default:user.username }}</h3>
+                <p class="text-muted mb-0">المستخدم الحالي</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
