@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 """
-سكريبت إعداد تلقائي لنظام إدارة المستندات
-يقوم بإنشاء المجموعات والصلاحيات والمستخدمين التجريبيين
+Automatic setup script for Document Management System
+Creates groups, permissions, and demo users
 """
 import os
 import sys
 import django
 
-# إعداد Django
+# Setup Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
@@ -17,54 +17,54 @@ from documents.models import Document
 
 def create_groups():
     """
-    إنشاء مجموعات المستخدمين
+    Create user groups
     """
-    print("⏳ جاري إنشاء المجموعات...")
+    print("⏳ Creating groups...")
     
-    # الحصول على ContentType
+    # Get ContentType
     content_type = ContentType.objects.get_for_model(Document)
     
-    # إنشاء مجموعة Admin
+    # Create Admin group
     admin_group, created = Group.objects.get_or_create(name='Admin')
     if created:
-        print("✅ تم إنشاء مجموعة Admin")
+        print("✅ Admin group created")
     else:
-        print("ℹ️  مجموعة Admin موجودة مسبقاً")
+        print("ℹ️  Admin group already exists")
     
-    # إضافة جميع الصلاحيات لـ Admin
+    # Add all permissions to Admin
     admin_permissions = Permission.objects.filter(content_type=content_type)
     admin_group.permissions.set(admin_permissions)
-    print(f"   → تم إضافة {admin_group.permissions.count()} صلاحية")
+    print(f"   → Added {admin_group.permissions.count()} permissions")
     
-    # إنشاء مجموعة Employee
+    # Create Employee group
     employee_group, created = Group.objects.get_or_create(name='Employee')
     if created:
-        print("✅ تم إنشاء مجموعة Employee")
+        print("✅ Employee group created")
     else:
-        print("ℹ️  مجموعة Employee موجودة مسبقاً")
+        print("ℹ️  Employee group already exists")
     
-    # إضافة صلاحيات للموظف (عرض، رفع، طباعة، تحميل)
+    # Add permissions to Employee (view, add, print)
     employee_permissions = Permission.objects.filter(
         content_type=content_type,
         codename__in=['view_document', 'add_document', 'print_document']
     )
     employee_group.permissions.set(employee_permissions)
-    print(f"   → تم إضافة {employee_group.permissions.count()} صلاحية (عرض، رفع، طباعة)")
+    print(f"   → Added {employee_group.permissions.count()} permissions (view, add, print)")
     
     return admin_group, employee_group
 
 def create_demo_users(admin_group, employee_group):
     """
-    إنشاء مستخدمين تجريبيين
+    Create demo users
     """
-    print("\n⏳ جاري إنشاء المستخدمين التجريبيين...")
+    print("\n⏳ Creating demo users...")
     
     users_data = [
         {
             'username': 'admin_demo',
             'email': 'admin@company.com',
-            'first_name': 'مدير',
-            'last_name': 'النظام',
+            'first_name': 'Admin',
+            'last_name': 'User',
             'password': 'admin123',
             'is_staff': True,
             'group': admin_group
@@ -72,8 +72,8 @@ def create_demo_users(admin_group, employee_group):
         {
             'username': 'employee1',
             'email': 'ahmed@company.com',
-            'first_name': 'أحمد',
-            'last_name': 'محمد',
+            'first_name': 'Ahmed',
+            'last_name': 'Mohamed',
             'password': 'emp123',
             'is_staff': False,
             'group': employee_group
@@ -81,8 +81,8 @@ def create_demo_users(admin_group, employee_group):
         {
             'username': 'employee2',
             'email': 'fatima@company.com',
-            'first_name': 'فاطمة',
-            'last_name': 'علي',
+            'first_name': 'Fatima',
+            'last_name': 'Ali',
             'password': 'emp123',
             'is_staff': False,
             'group': employee_group
@@ -105,64 +105,64 @@ def create_demo_users(admin_group, employee_group):
             user.set_password(password)
             user.save()
             user.groups.add(group)
-            print(f"✅ تم إنشاء المستخدم: {username} (كلمة المرور: {password})")
+            print(f"✅ User created: {username} (password: {password})")
             created_users.append((username, password, group.name))
         else:
-            print(f"ℹ️  المستخدم {username} موجود مسبقاً")
+            print(f"ℹ️  User {username} already exists")
     
     return created_users
 
 def print_summary(created_users):
     """
-    عرض ملخص الإعداد
+    Print setup summary
     """
     print("\n" + "="*60)
-    print("✨ اكتمل الإعداد بنجاح!")
+    print("✨ Setup completed successfully!")
     print("="*60)
     
     if created_users:
-        print("\n👥 المستخدمين التجريبيين:")
+        print("\n👥 Demo Users:")
         print("-" * 60)
         for username, password, group in created_users:
-            print(f"   اسم المستخدم: {username}")
-            print(f"   كلمة المرور: {password}")
-            print(f"   المجموعة: {group}")
+            print(f"   Username: {username}")
+            print(f"   Password: {password}")
+            print(f"   Group: {group}")
             print("-" * 60)
     
-    print("\n🚀 خطوات البدء:")
-    print("   1. شغل السيرفر: python manage.py runserver")
-    print("   2. افتح المتصفح: http://localhost:8000")
-    print("   3. سجل دخول بأحد المستخدمين أعلاه")
+    print("\n🚀 Next Steps:")
+    print("   1. Start server: python manage.py runserver")
+    print("   2. Open browser: http://localhost:8000")
+    print("   3. Login with one of the users above")
     
-    print("\n⚠️  تنبيه أمني:")
-    print("   - هذه حسابات تجريبية فقط")
-    print("   - غير كلمات المرور للإنتاج")
-    print("   - احذف المستخدمين التجريبيين بعد الاختبار")
+    print("\n⚠️  Security Warning:")
+    print("   - These are demo accounts only")
+    print("   - Change passwords for production")
+    print("   - Delete demo users after testing")
     
-    print("\n📚 للمزيد من المعلومات:")
-    print("   اقرأ دليل التثبيت والإعداد الكامل")
+    print("\n📚 For more information:")
+    print("   Read the complete installation guide")
     print("="*60 + "\n")
 
 def main():
     """
-    الدالة الرئيسية
+    Main function
     """
     print("\n" + "="*60)
-    print("🔧 سكريبت الإعداد التلقائي - نظام إدارة المستندات")
+    print("🔧 Automatic Setup - Document Management System")
     print("="*60 + "\n")
     
     try:
-        # إنشاء المجموعات
+        # Create groups
         admin_group, employee_group = create_groups()
         
-        # إنشاء المستخدمين التجريبيين
+        # Create demo users
         created_users = create_demo_users(admin_group, employee_group)
         
-        # عرض الملخص
+        # Print summary
         print_summary(created_users)
         
     except Exception as e:
-        print(f"\n❌ حدث خطأ: {str(e)}")
+        print(f"\n❌ Error occurred: {str(e)}")
         sys.exit(1)
 
 if __name__ == '__main__':
