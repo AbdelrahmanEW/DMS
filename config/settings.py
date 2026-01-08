@@ -10,8 +10,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security settings
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-change-this-in-production')
-DEBUG = config('DEBUG', default= False, cast=bool)
-ALLOWED_HOSTS = ['AbdulrahmanEW.pythonanywhere.com']
+DEBUG = config('DEBUG', default=False, cast=bool)
+ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='AbdulrahmanEW.pythonanywhere.com').split(',')
 
 # Application definition
 INSTALLED_APPS = [

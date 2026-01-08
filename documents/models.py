@@ -1,5 +1,5 @@
 """
-Document models
+Document models - Updated to support images
 """
 import os
 from django.db import models
@@ -23,8 +23,8 @@ class Document(models.Model):
     file = models.FileField(
         'الملف',
         upload_to=document_upload_path,
-        validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
-        help_text='ملفات PDF فقط (أقصى حجم 10MB)'
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'jpg', 'jpeg', 'png', 'gif'])],
+        help_text='ملفات PDF أو صور (JPG, PNG, GIF) - أقصى حجم 10MB'
     )
     
     # Metadata
@@ -76,6 +76,17 @@ class Document(models.Model):
             size /= 1024.0
         return f"{size:.1f} TB"
     
+    def get_file_type(self):
+        """
+        الحصول على نوع الملف
+        """
+        file_extension = os.path.splitext(self.file.name)[1].lower()
+        if file_extension == '.pdf':
+            return 'pdf'
+        elif file_extension in ['.jpg', '.jpeg', '.png', '.gif']:
+            return 'image'
+        return 'unknown'
+    
     def increment_views(self):
         """
         زيادة عداد المشاهدات
@@ -100,6 +111,7 @@ class DocumentAccessLog(models.Model):
         ('download', 'تحميل'),
         ('print', 'طباعة'),
         ('delete', 'حذف'),
+        ('upload', 'رفع'),
     ]
     
     document = models.ForeignKey(

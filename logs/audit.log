@@ -2,3 +2,6 @@ INFO 2026-01-07 20:07:54,520 views admin - upload - г«бне
 INFO 2026-01-07 20:19:11,070 views user - view - г«бне
 INFO 2026-01-07 20:19:17,742 views user - download - г«бне
 INFO 2026-01-07 20:36:43,387 views user - print - г«бне
+INFO 2026-01-08 15:32:21,717 views admin - upload - test
+INFO 2026-01-08 15:32:29,533 views admin - view - test
+INFO 2026-01-08 15:32:40,944 views admin - print - test
